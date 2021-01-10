@@ -137,7 +137,7 @@ int main() {
     }
 
     // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
-    //stbi_set_flip_vertically_on_load(true);
+
 
     programState = new ProgramState;
     programState->LoadFromFile("resources/program_state.txt");
@@ -161,9 +161,17 @@ int main() {
 
     // build and compile shaders
     // -------------------------
+
     Shader shader("resources/shaders/cubemaps.vs" , "resources/shaders/cubemaps.fs");
     Shader skyboxShader("resources/shaders/skybox.vs", "resources/shaders/skybox.fs");
     Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
+    Shader planetShader("resources/shaders/planet.vs", "resources/shaders/planet.fs");
+
+    stbi_set_flip_vertically_on_load(false);
+
+    Model earthModel("resources/objects/uploads_files_2566680_SunEarthMoon/Earth/Earth.obj");
+    Model sunModel("resources/objects/uploads_files_2566680_SunEarthMoon/Sun/Sun.obj");
+    Model moonModel("resources/objects/uploads_files_2566680_SunEarthMoon/Moon/Moon.obj");
 
     float skyboxVertices[] = {
             // positions
@@ -230,7 +238,7 @@ int main() {
                     FileSystem::getPath("resources/textures/skybox/front-min.png"),
                     FileSystem::getPath("resources/textures/skybox/back-min.png")
             };
-
+    stbi_set_flip_vertically_on_load(false);
     unsigned int cubemapTexture = loadCubemap(faces);
 
     //shader configuration
@@ -275,12 +283,43 @@ int main() {
         glBindVertexArray(0);
 */
 
+        planetShader.use();
+        planetShader.setMat4("projection", projection);
+        planetShader.setMat4("view",view);
+
+        //SUN RENDER
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,glm::vec3(0.0f,-3.0f, -57.0f));
+        model = glm::scale(model,glm::vec3(0.79f,0.79f,0.79f));
+        planetShader.setMat4("model",model);
+        sunModel.Draw(planetShader);
+
+        float zemljaX=(sin(glfwGetTime()/10))*60;
+        float zemljaZ=-57.0f+(cos(glfwGetTime()/10))*50;
+
+        //EARTH RENDER
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,glm::vec3(zemljaX,-3.0f, zemljaZ));
+        model = glm::scale(model,glm::vec3(0.2f,0.2f,0.2f));
+        planetShader.setMat4("model",model);
+        earthModel.Draw(planetShader);
+
+        //MOON RENDER
+        model = glm::mat4(1.0f);
+        model = glm::translate(model,glm::vec3(zemljaX+sin(glfwGetTime()/2)*15,-3.0f, zemljaZ+cos(glfwGetTime()/2)*15));
+        model = glm::scale(model,glm::vec3(0.08f,0.08f,0.08f));
+        planetShader.setMat4("model",model);
+        moonModel.Draw(planetShader);
+
+
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
         skyboxShader.use();
         view = glm::mat4(glm::mat3(programState->camera.GetViewMatrix())); // remove translation from the view matrix
         skyboxShader.setMat4("view", view);
         skyboxShader.setMat4("projection", projection);
+
+
 
         // skybox cube
         glBindVertexArray(skyboxVAO);
@@ -289,7 +328,6 @@ int main() {
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         glDepthFunc(GL_LESS); // set depth function back to default
-
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
