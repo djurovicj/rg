@@ -164,14 +164,25 @@ int main() {
 
     Shader shader("resources/shaders/cubemaps.vs" , "resources/shaders/cubemaps.fs");
     Shader skyboxShader("resources/shaders/skybox.vs", "resources/shaders/skybox.fs");
-    Shader ourShader("resources/shaders/2.model_lighting.vs", "resources/shaders/2.model_lighting.fs");
     Shader planetShader("resources/shaders/planet.vs", "resources/shaders/planet.fs");
+    Shader sunShader("resources/shaders/sun.vs", "resources/shaders/sun.fs");
 
     stbi_set_flip_vertically_on_load(false);
 
     Model earthModel("resources/objects/uploads_files_2566680_SunEarthMoon/Earth/Earth.obj");
+            earthModel.SetShaderTextureNamePrefix("material.");
+            PointLight pointLight;
+            pointLight.position = glm::vec3(0.0f,-3.0f, -57.0f);
+            pointLight.ambient = glm::vec3(0.4f,0.4f,0.4f);
+            pointLight.diffuse = glm::vec3(0.8,0.8,0.8);
+            pointLight.specular = glm::vec3(1.0,1.0,1.0);
+            pointLight.constant = 1.0f;
+            pointLight.linear = 0.009f;
+            pointLight.quadratic = 0.002f;
+
     Model sunModel("resources/objects/uploads_files_2566680_SunEarthMoon/Sun/Sun.obj");
     Model moonModel("resources/objects/uploads_files_2566680_SunEarthMoon/Moon/Moon.obj");
+            moonModel.SetShaderTextureNamePrefix("material.");
 
     float skyboxVertices[] = {
             // positions
@@ -283,16 +294,46 @@ int main() {
         glBindVertexArray(0);
 */
 
-        planetShader.use();
-        planetShader.setMat4("projection", projection);
-        planetShader.setMat4("view",view);
+        sunShader.use();
+        sunShader.setMat4("projection", projection);
+        sunShader.setMat4("view",view);
 
         //SUN RENDER
         model = glm::mat4(1.0f);
         model = glm::translate(model,glm::vec3(0.0f,-3.0f, -57.0f));
         model = glm::scale(model,glm::vec3(0.79f,0.79f,0.79f));
-        planetShader.setMat4("model",model);
-        sunModel.Draw(planetShader);
+        sunShader.setMat4("model",model);
+        sunModel.Draw(sunShader);
+
+
+        planetShader.use();
+
+        pointLight.position =glm::vec3(0.0f,-3.0f, -57.0f);
+        planetShader.setVec3("pointLight.position",pointLight.position);
+        planetShader.setVec3("pointLight.ambient", pointLight.ambient);
+        planetShader.setVec3("pointLight.diffuse", pointLight.diffuse);
+        planetShader.setVec3("pointLight.specular", pointLight.specular);
+        planetShader.setFloat("pointLight.constant", pointLight.constant);
+        planetShader.setFloat("pointLight.linear", pointLight.linear);
+        planetShader.setFloat("pointLight.quadratic", pointLight.quadratic);
+        planetShader.setFloat("material.shininess",512.0f);
+        planetShader.setVec3("viewPosition",programState->camera.Position);
+
+
+        // spotLight
+        planetShader.setVec3("spotLight.position", programState->camera.Position);
+        planetShader.setVec3("spotLight.direction", programState->camera.Front);
+        planetShader.setVec3("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+        planetShader.setVec3("spotLight.diffuse", 1.0f, 1.0f, 1.0f);
+        planetShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+        planetShader.setFloat("spotLight.constant", 1.0f);
+        planetShader.setFloat("spotLight.linear", 0.09);
+        planetShader.setFloat("spotLight.quadratic", 0.032);
+        planetShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(12.5f)));
+        planetShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+        planetShader.setMat4("projection", projection);
+        planetShader.setMat4("view",view);
+
 
         float zemljaX=(sin(glfwGetTime()/10))*60;
         float zemljaZ=-57.0f+(cos(glfwGetTime()/10))*50;
@@ -340,15 +381,6 @@ int main() {
     //Model ourModel("resources/objects/backpack/backpack.obj");
     //ourModel.SetShaderTextureNamePrefix("material.");
 
-    PointLight& pointLight = programState->pointLight;
-    pointLight.position = glm::vec3(4.0f, 4.0, 0.0);
-    pointLight.ambient = glm::vec3(0.1, 0.1, 0.1);
-    pointLight.diffuse = glm::vec3(0.6, 0.6, 0.6);
-    pointLight.specular = glm::vec3(1.0, 1.0, 1.0);
-
-    pointLight.constant = 1.0f;
-    pointLight.linear = 0.09f;
-    pointLight.quadratic = 0.032f;
 
 
 
