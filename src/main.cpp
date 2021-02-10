@@ -276,13 +276,7 @@ int main() {
         shader.setMat4("model", model);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
-        // cubes
-        /* glBindVertexArray(cubeVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, cubeTexture);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-*/
+        
         glDepthFunc(GL_ALWAYS);
         sunShader.use();
         sunShader.setMat4("projection", projection);
@@ -518,14 +512,7 @@ void DrawImGui(ProgramState *programState) {
                     "(Four other moons in our solar system are even bigger.)\n"
                     "The moon is a bit more than one-fourth (27 percent) the size of Earth, a much smaller ratio (1:4) than any other planets and their moons.\n"
                     "This means the moon has a great effect on the planet and very possibly is what makes life on Earth possible.");
-        /*ImGui::SliderFloat("Float slider", &f, 0.0, 1.0);
-        ImGui::ColorEdit3("Background color", (float *) &programState->clearColor);
-        ImGui::DragFloat3("Backpack position", (float*)&programState->backpackPosition);
-        ImGui::DragFloat("Backpack scale", &programState->backpackScale, 0.05, 0.1, 4.0);
 
-        ImGui::DragFloat("pointLight.constant", &programState->pointLight.constant, 0.05, 0.0, 1.0);
-        ImGui::DragFloat("pointLight.linear", &programState->pointLight.linear, 0.05, 0.0, 1.0);
-        ImGui::DragFloat("pointLight.quadratic", &programState->pointLight.quadratic, 0.05, 0.0, 1.0);*/
         ImGui::End();
     }
 
