@@ -142,7 +142,7 @@ int main() {
     programState = new ProgramState;
     programState->LoadFromFile("resources/program_state.txt");
     if (programState->ImGuiEnabled) {
-        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
     // Init Imgui
     IMGUI_CHECKVERSION();
@@ -151,7 +151,7 @@ int main() {
     (void) io;
 
 
-
+    ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
@@ -371,6 +371,10 @@ int main() {
         glDepthFunc(GL_LESS); // set depth function back to default
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
+
+        if (programState->ImGuiEnabled)
+            DrawImGui(programState);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -447,6 +451,12 @@ int main() {
 
     glDeleteVertexArrays(1, &skyboxVAO);
     glDeleteVertexArrays(1, &skyboxVAO);
+
+    programState->SaveToFile("resources/program_state.txt");
+    delete programState;
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwTerminate();
     return 0;
@@ -586,17 +596,26 @@ void DrawImGui(ProgramState *programState) {
 
 
     {
-        static float f = 0.0f;
-        ImGui::Begin("Hello window");
-        ImGui::Text("Hello text");
-        ImGui::SliderFloat("Float slider", &f, 0.0, 1.0);
+        /*static float f = 0.0f;*/
+        ImGui::Begin("Moon facts");
+        ImGui::Text("Moon phases and the moon's orbit are mysteries to many.\n"
+                    "For example, the moon always shows us the same face.\n"
+                    "That happens because it takes 27.3 days both to rotate on its axis and to orbit Earth.\n"
+                    "We see either the full moon, half moon or no moon (new moon) because the moon reflects sunlight.\n"
+                    "How much of it we see depends on the moon's position in relation to Earth and the sun.\n"
+                    "\n"
+                    "Though a satellite of Earth, the moon, with a diameter of about 2,159 miles (3,475 kilometers), is bigger than Pluto.\n"
+                    "(Four other moons in our solar system are even bigger.)\n"
+                    "The moon is a bit more than one-fourth (27 percent) the size of Earth, a much smaller ratio (1:4) than any other planets and their moons.\n"
+                    "This means the moon has a great effect on the planet and very possibly is what makes life on Earth possible.");
+        /*ImGui::SliderFloat("Float slider", &f, 0.0, 1.0);
         ImGui::ColorEdit3("Background color", (float *) &programState->clearColor);
         ImGui::DragFloat3("Backpack position", (float*)&programState->backpackPosition);
         ImGui::DragFloat("Backpack scale", &programState->backpackScale, 0.05, 0.1, 4.0);
 
         ImGui::DragFloat("pointLight.constant", &programState->pointLight.constant, 0.05, 0.0, 1.0);
         ImGui::DragFloat("pointLight.linear", &programState->pointLight.linear, 0.05, 0.0, 1.0);
-        ImGui::DragFloat("pointLight.quadratic", &programState->pointLight.quadratic, 0.05, 0.0, 1.0);
+        ImGui::DragFloat("pointLight.quadratic", &programState->pointLight.quadratic, 0.05, 0.0, 1.0);*/
         ImGui::End();
     }
 
@@ -615,7 +634,7 @@ void DrawImGui(ProgramState *programState) {
 }
 
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_F1 && action == GLFW_PRESS) {
+    if (key == GLFW_KEY_F12 && action == GLFW_PRESS) {
         programState->ImGuiEnabled = !programState->ImGuiEnabled;
         if (programState->ImGuiEnabled) {
             programState->CameraMouseMovementUpdateEnabled = false;
